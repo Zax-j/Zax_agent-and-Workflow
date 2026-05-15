@@ -65,6 +65,6 @@ with col2:
     st.markdown("""
     <div class="card">
         <h3>📋 工作日志生成器</h3>
-        <p>LangGraph工作流，一键将零散日志生成标准周报</p>
+        <p>工作流，一键将零散日志生成标准周报</p>
     </div>
     """, unsafe_allow_html=True)
