@@ -14,9 +14,3 @@ langchain-community>=0.0.20
 langchain-text-splitters>=0.0.1
 faiss-cpu>=1.7.4
 sentence-transformers>=2.5.0
-base64
-json
-re
-typing
-io
-os
