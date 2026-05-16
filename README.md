@@ -1,6 +1,9 @@
 #### 1.首要强调的是，Zax_agent和Workflow的界面，是通过侧边栏切换的
 <img width="2549" height="1335" alt="image" src="https://github.com/user-attachments/assets/9bfd6802-467e-4acf-9c66-3ffd8a0442da" />
 
+#### 3.其次是注意streamlit网页是默认light，因为我项目的主题色是dark，所以建议使用的过程中，把右上角的改成dark，具体图片如下
+<img width="2556" height="1344" alt="image" src="https://github.com/user-attachments/assets/9fc52d99-33bf-40f0-b7da-dbfb516e3c85" />
+
 #### 2.API配置需要自己调用，本次用到了两个大模型，可以根据代码自行增减大模型的个数
 
 #### 3.关于test_flies，里面是Zax的智能体和工作日志工作流的测试文件，包括文档，图片，.txt格式文件；里面的.txt文件是专门用来测试工作流的；图片分为两类，第一类是文字图片，用来测试OCR文字识别，第二类是风景和动物图片，是测试图片理解的；文档是用来做知识库的
