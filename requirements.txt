@@ -1,3 +1,4 @@
+# 原有的所有依赖
 streamlit>=1.32.0
 openai>=1.0.0
 python-dotenv>=1.0.0
@@ -15,3 +16,8 @@ langchain-text-splitters>=0.0.1
 faiss-cpu>=1.7.4
 sentence-transformers>=2.5.0
 openpyxl>=3.1.2
+
+# 新增：FastAPI 后端依赖
+fastapi>=0.100.0
+uvicorn>=0.23.2
+python-multipart>=0.0.6

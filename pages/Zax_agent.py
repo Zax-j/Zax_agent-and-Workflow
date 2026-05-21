@@ -75,7 +75,7 @@ driver = get_neo4j_driver()
 def web_search(query):
     try:
         with DDGS() as ddgs:
-            results = list(ddgs.text(query, max_results=3))
+            results = list(ddgs.text(query, max_results=5))
         return "\n".join([f"🔍 {r['body']}" for r in results])
     except:
         return "联网搜索失败"
@@ -351,3 +351,85 @@ col1, col2 = st.columns([1, 4])
 with col1:
     chat_md = export_chat_history()
     st.download_button("📥 导出对话", chat_md, "对话记录.md", use_container_width=True)
+
+
+# ====================== API 调用专用核心函数（无界面，纯逻辑）======================
+def zax_agent_core(
+    prompt: str,
+    # 工具开关
+    enable_rag: bool = True,
+    enable_neo4j: bool = True,
+    enable_ocr: bool = True,
+    enable_web: bool = False,
+    enable_vl: bool = False,
+    # 外部传入数据（替代streamlit session_state）
+    vector_db = None,
+    edited_ocr_text: str = None,
+    vl_image = None,
+    # 模型选择
+    model_choice: str = "DeepSeek-V4"
+):
+    """
+    Zax智能体核心逻辑（API专用，无界面依赖）
+    :return: 最终回答文本
+    """
+    try:
+        tool_logs = []
+        context = ""
+
+        # 1. 获取模型客户端
+        if model_choice == "DeepSeek-V4":
+            client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"), base_url=os.getenv("OPENAI_BASE_URL"))
+            current_model = os.getenv("MODEL_NAME")
+        elif model_choice == "通义千问VL-Flash(图像理解)":
+            client = OpenAI(api_key=os.getenv("QWEN_VL_API_KEY"), base_url=os.getenv("QWEN_VL_BASE_URL"))
+            current_model = os.getenv("QWEN_VL_MODEL")
+        else:
+            client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"), base_url=os.getenv("OPENAI_BASE_URL"))
+            current_model = os.getenv("MODEL_NAME")
+
+        # 2. 拼接工具上下文
+        if enable_rag and vector_db:
+            doc_ctx = retrieve_context(prompt, vector_db)
+            context += f"【文档内容】\n{doc_ctx}\n\n"
+            tool_logs.append("调用文档知识库")
+        if enable_neo4j:
+            neo_ctx = query_neo4j(prompt)
+            if neo_ctx:
+                context += f"【人物关系】\n{neo_ctx}\n\n"
+                tool_logs.append("调用水浒知识图谱")
+        if enable_web:
+            web_ctx = web_search(prompt)
+            context += f"【联网搜索】\n{web_ctx}\n\n"
+            tool_logs.append("调用联网搜索")
+        if enable_ocr and edited_ocr_text and any(k in prompt for k in ["表格", "excel", "导出"]):
+            context += f"【OCR文本】\n{edited_ocr_text}\n\n请整理为JSON格式（仅包含headers和rows字段）"
+            tool_logs.append("调用OCR表格生成")
+
+        # 3. 构造消息
+        if enable_vl and vl_image:
+            img_b64 = encode_image_to_base64(vl_image)
+            messages = [
+                {"role": "user", "content": [
+                    {"type": "image_url", "image_url": {"url": img_b64}},
+                    {"type": "text", "text": prompt}
+                ]}
+            ]
+        else:
+            messages = [
+                {"role": "system", "content": "你是Zax的智能助手，可根据用户开启的工具回答问题，简洁专业。"},
+                {"role": "user", "content": f"参考资料：\n{context}\n用户问题：{prompt}"}
+            ]
+
+        # 4. 调用大模型（非流式，适配API）
+        response = client.chat.completions.create(
+            model=current_model,
+            messages=messages,
+            stream=False
+        )
+        reply = response.choices[0].message.content
+
+        return reply
+
+    except Exception as e:
+        return f"智能体执行异常：{str(e)}"
