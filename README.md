@@ -1,4 +1,4 @@
-### 新增内容：后端
+### 新增内容：项目提供完整的 FastAPI 后端接口，包含智能对话、OCR 识别、RAG 检索等原智能体包含的功能；支持本地直接启动运行，可通过 Docker 实现容器化封装，同时可无缝部署至 Render、Railway 等云端服务平台，具备完整的工程化部署能力。
 1.可以实现FastAPI 工具接口封装，执行命令uvicorn api.main:app --reload，根据本地出现的网址，后面需要加上/docs是可以登陆网址查看各个工具接口
 <img width="2521" height="1314" alt="image" src="https://github.com/user-attachments/assets/9e140029-f343-4fa0-9492-9697cffb05fd" />
 2.新增日志记录，正常调用工具会在文件下出现app.log的日志文件，可以在里面查看调用的接口，时间，错误；同时增加了全局异常捕获，增加了超时限制（可根据任务调节），会同步在日志里记录
